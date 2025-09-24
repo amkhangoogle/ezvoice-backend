@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Accept POST (JSON) or GET (?to=&text=) for easy testing
   const input = req.method === "POST"
     ? (typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {}))
     : (req.query || {});
@@ -7,6 +6,7 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.TELNYX_API_KEY;
   const from = process.env.SMS_FROM;
+  const profileId = process.env.TELNYX_MESSAGING_PROFILE_ID;
 
   if (!apiKey || !from) {
     return res.status(500).json({ ok: false, error: "Missing TELNYX_API_KEY or SMS_FROM env vars" });
@@ -22,7 +22,12 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`
       },
-      body: JSON.stringify({ from, to, text })
+      body: JSON.stringify({
+        from,
+        to,
+        text,
+        ...(profileId ? { messaging_profile_id: profileId } : {})
+      })
     });
     const out = await r.json();
     if (!r.ok) return res.status(500).json({ ok: false, telnyx_error: out });
