@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   // --- CORS ---
-  res.setHeader("Access-Control-Allow-Origin", "*"); // you can lock to https://easytvoffers.com later
+  res.setHeader("Access-Control-Allow-Origin", "*"); // lock to https://easytvoffers.com later
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") return res.status(200).end();
@@ -19,6 +19,14 @@ export default async function handler(req, res) {
         model: "gpt-4o-realtime-preview",
         voice: "verse",
         modalities: ["audio", "text"],
+        // auto greet / listen
+        turn_detection: {
+          type: "server_vad",
+          threshold: 0.5,
+          prefix_padding_ms: 300,
+          silence_duration_ms: 200,
+          create_response: true
+        },
         instructions: `
 You are EZTV Voice—an upbeat, concise concierge for Easy TV Offers (10¢ per airing).
 Goals: greet, qualify interest/location/budget, capture NAME/EMAIL/PHONE,
