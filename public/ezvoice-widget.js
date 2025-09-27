@@ -1,4 +1,4 @@
-// EZTV Voice external widget (tools + KB) — v1
+// EZTV Voice external widget (tools + KB) — v1.1
 (function () {
   const backend = "https://ezvoice-backend.vercel.app"; // change if your Vercel URL differs
 
@@ -79,11 +79,18 @@
           if (["failed", "disconnected", "closed"].includes(pc.connectionState)) stop();
         };
 
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        try {
+          localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (permErr) {
+          throw new Error("Microphone permission denied or unavailable.");
+        }
         localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
 
         dc = pc.createDataChannel("oai-events");
-        dc.onopen = () => { log("datachannel open"); try { dc.send(JSON.stringify({ type: "response.create" })); } catch {} };
+        dc.onopen = () => {
+          log("datachannel open");
+          // NOTE: no manual response.create here — server_vad will auto-greet in EN
+        };
         dc.onerror = (e) => err("datachannel error", e);
         dc.onmessage = async (evt) => {
           try {
@@ -157,9 +164,17 @@
 
     function stop() {
       try {
-        if (dc) { try { dc.close(); } catch { } dc = null; }
-        if (pc) { try { pc.getSenders().forEach(s => s.track && s.track.stop()); } catch { } try { pc.close(); } catch { } pc = null; }
-        if (localStream) { try { localStream.getTracks().forEach(t => t.stop()); } catch { } localStream = null; }
+        if (dc) { try { dc.close(); } catch {} dc = null; }
+        if (pc) {
+          try { pc.getSenders().forEach(s => s.track && s.track.stop()); } catch {}
+          try { pc.close(); } catch {}
+          pc = null;
+        }
+        if (localStream) {
+          try { localStream.getTracks().forEach(t => t.stop()); } catch {}
+          localStream = null;
+        }
+        try { if (audioEl) audioEl.srcObject = null; } catch {}
       } finally { setBtn(false); }
     }
 
