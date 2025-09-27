@@ -1,14 +1,14 @@
-// Simple Knowledge Base API for EZTV Voice
-// ✅ Paste this as: api/kb.js
+// Simple Knowledge Base API for EZTV Voice (brand-sanitized)
+// ✅ Paste as: api/kb.js
 
-// === Edit/expand these facts anytime ===
+// === Edit/expand these facts anytime (no internal codenames) ===
 const ARTICLES = [
   // ─────────── EasyTVOFFERS (core) ───────────
   {
     title: "Offer basics",
     tags: ["pricing","cost","rates","10 cents","ten cents","airing","budget"],
     content: `
-We place your ads on living-room TV via Connected TV (YouTube on TVs).
+We place ads on living-room TV via Connected TV (e.g., YouTube on TVs).
 Pricing starts from **10¢ per airing**; actual rates vary by market, channel inventory, and time-of-day.
 We don't guarantee specific results; we propose a plan after a short discovery call.
     `.trim()
@@ -18,7 +18,7 @@ We don't guarantee specific results; we propose a plan after a short discovery c
     tags: ["CTV","connected tv","youtube tv","living room","national","local","coverage","dayparts"],
     content: `
 Primary channel is YouTube on Connected TV (living-room screens). Placements can be national or local.
-Targeting and dayparts depend on inventory availability for the selected markets.
+Targeting and dayparts depend on inventory availability for selected markets.
     `.trim()
   },
   {
@@ -101,52 +101,58 @@ https://cal.com/amkhan/30min
     `.trim()
   },
 
-  // ─────────── Nedzo (fill in your specifics) ───────────
+  // ─────────── Our platform (codename-free) ───────────
   {
-    title: "Nedzo: What it is",
-    tags: ["nedzo","overview","platform","product","service"],
+    title: "Our platform: overview",
+    tags: ["platform","overview","product","service"],
     content: `
-[EDIT ME] Nedzo is your <one-line definition>. Typical users are <who>. Primary outcome: <what they get>.
-Keep this factual and short so the voice agent can quote it reliably.
+Our platform helps businesses place TV/radio-style airings across living-room screens with simple setup and transparent reports.
+Typical users are local businesses and agencies; the outcome is predictable placement with clear metrics.
     `.trim()
   },
   {
-    title: "Nedzo: Pricing & plans",
-    tags: ["nedzo","pricing","plans","cost"],
+    title: "Our platform: pricing & plans",
+    tags: ["platform","pricing","plans","cost"],
     content: `
-[EDIT ME] Pricing structure: <facts only>. Discounts: <yes/no>. Setup fees: <yes/no>. Trial: <yes/no, length>.
-Note: EZTV TV/radio airings pricing still uses **from 10¢ per airing**, varies by market and time.
+Pricing is straightforward and proposal-based for your markets and dayparts.
+For TV/radio placements, pricing still starts **from 10¢ per airing**, varying by market and time.
     `.trim()
   },
   {
-    title: "Nedzo: Onboarding",
-    tags: ["nedzo","onboarding","setup","start","process"],
+    title: "Our platform: onboarding",
+    tags: ["platform","onboarding","setup","start","process"],
     content: `
-[EDIT ME] 1) Discovery → 2) Access & assets → 3) Creative/placements plan → 4) Launch.
-Turnaround: <e.g., 3–5 business days after assets>. Required assets: <list>.
+1) Discovery → 2) Access & assets → 3) Creative/placements plan → 4) Launch.
+Typical turnaround can be ~3–5 business days after assets are approved.
     `.trim()
   },
   {
-    title: "Nedzo: Targeting & channels",
-    tags: ["nedzo","channels","coverage","targeting","inventory"],
+    title: "Our platform: targeting & channels",
+    tags: ["platform","channels","coverage","targeting","inventory"],
     content: `
-[EDIT ME] Supported channels: <e.g., TV, radio, OTT/CTV, streaming audio>. Coverage: national + local.
-Targeting depends on inventory and dayparts for selected markets.
+Supports Connected TV and related inventory; national + local coverage.
+Targeting depends on market inventory and dayparts for selected geos.
     `.trim()
   },
   {
-    title: "Nedzo: Measurement & expectations",
-    tags: ["nedzo","results","roi","kpi","measurement","attribution"],
+    title: "Our platform: measurement & expectations",
+    tags: ["platform","results","roi","kpi","measurement","attribution"],
     content: `
-[EDIT ME] No guaranteed outcomes. Typical KPIs: <leads/calls/visits>. Measurement approach: <brief>.
-Set expectations on the discovery call; tailor plan to budget and market.
+No guaranteed outcomes. Typical KPIs: leads, calls, site visits, or QR scans.
+We align expectations during the discovery call and tailor the plan to budget and market.
     `.trim()
   }
 ];
 
-// ─── tiny search helper ───
+// ——— query normalization so if someone says the old codename, we answer generically ———
+function normalizeQuery(q) {
+  const s = (q || "").toLowerCase();
+  return s.replace(/\bnedzo\b/g, "platform"); // map the codename to neutral concept
+}
+
+// ——— tiny search helper ———
 function searchKB(query) {
-  const q = (query || "").toLowerCase().trim();
+  const q = normalizeQuery(query).trim();
   if (!q) return [];
   const terms = q.split(/\s+/).filter(Boolean);
   const scored = ARTICLES.map(a => {
@@ -164,7 +170,7 @@ function searchKB(query) {
 }
 
 export default async function handler(req, res) {
-  // CORS (allow your domains; loosen during testing if needed)
+  // CORS (loosen or lock as you wish)
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
