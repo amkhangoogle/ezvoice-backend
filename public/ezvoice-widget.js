@@ -1,6 +1,105 @@
-// EZTV Voice external widget (tools + KB) — v1.1
+// EZTV Voice external widget (tools + local KB) — v2 fast
 (function () {
   const backend = "https://ezvoice-backend.vercel.app"; // change if your Vercel URL differs
+
+  // --- Local KB (short, public, codename-free). Keep it concise for instant examples. ---
+  const KB = [
+    {
+      title: "Offer basics",
+      tags: ["pricing","cost","rates","10 cents","ten cents","airing","budget"],
+      content: `We place ads on Connected TV (e.g., YouTube on TVs). Pricing starts from **10¢ per airing**; exact rates vary by market, inventory, and time-of-day. No guaranteed outcomes.`
+    },
+    {
+      title: "Channels & coverage",
+      tags: ["CTV","connected tv","youtube tv","living room","national","local","coverage"],
+      content: `Primary channel is YouTube on living-room TVs. We support national and local placements; targeting depends on market inventory and dayparts.`
+    },
+    {
+      title: "Creative & speed",
+      tags: ["creative","script","voiceover","editing","turnkey","72 hours","launch"],
+      content: `Turnkey workflow: scripting, pro voiceover, editing. Launch can be ~72 hours after assets approval.`
+    },
+    {
+      title: "QR & reporting",
+      tags: ["qr","scan","promo","reporting","analytics","time slots","scans"],
+      content: `We can embed QR codes for offers and opt-ins. Reporting shows when ads ran, estimated views, dayparts, and QR scans.`
+    },
+    {
+      title: "Process summary",
+      tags: ["process","onboarding","steps","how it works"],
+      content: `Greet → qualify (industry, locations, budget) → capture name + phone (email optional) → propose plan → offer a 10–30 minute discovery call.`
+    },
+    {
+      title: "Lead capture rules",
+      tags: ["lead","contact","phone","email","forms","consent"],
+      content: `Required: name + phone. Optional: email. Confirm back briefly (mask phone like (XXX) XXX-1234). If declined, offer the booking link.`
+    },
+    {
+      title: "Compliance",
+      tags: ["compliance","privacy","do not call","dncl","sensitive"],
+      content: `Honor do-not-contact. Don’t collect sensitive data. Use contact info only for service follow-up.`
+    },
+    // Case studies / proof (brief)
+    {
+      title: "Case study: Math learning center",
+      tags: ["case study","proof","mathnasium","lead spike"],
+      content: `~16k+ TV airings in ~30 days; owner reported a noticeable lead spike.`
+    },
+    {
+      title: "Case study: Local realtor",
+      tags: ["case study","realtor","buyers","sellers"],
+      content: `Two campaigns (buyers & sellers); new opt-ins and seller leads within days.`
+    },
+    {
+      title: "Case study: Insurance agency",
+      tags: ["case study","insurance","qr","inquiries"],
+      content: `TV commercial with QR code drove SMS texts and direct inquiries.`
+    },
+    {
+      title: "Case study: Restaurant",
+      tags: ["case study","restaurant","orders"],
+      content: `First week produced a mix of calls, SMS, and orders.`
+    },
+    {
+      title: "Booking link",
+      tags: ["booking","cal.com","schedule","meeting","discovery"],
+      content: `Schedule a 10–30 minute discovery call: https://cal.com/amkhan/30min`
+    },
+    // Our platform (codename-free)
+    {
+      title: "Platform: overview",
+      tags: ["platform","overview","product","service"],
+      content: `Helps businesses place TV-style airings on living-room screens with simple setup and transparent metrics.`
+    },
+    {
+      title: "Platform: onboarding",
+      tags: ["platform","onboarding","setup","start"],
+      content: `1) Discovery → 2) Access & assets → 3) Creative/placements plan → 4) Launch (often 3–5 business days after assets).`
+    },
+    {
+      title: "Platform: measurement",
+      tags: ["platform","results","roi","kpi","measurement"],
+      content: `No guaranteed outcomes. Typical KPIs: leads, calls, site visits, QR scans. Align expectations during the discovery call.`
+    }
+  ];
+  function normalizeQuery(q) { return (q || "").toLowerCase().replace(/\bnedzo\b/g, "platform"); }
+  function localSearchKB(q) {
+    const s = normalizeQuery(q).trim();
+    if (!s) return [];
+    const terms = s.split(/\s+/).filter(Boolean);
+    const scored = KB.map(a => {
+      const txt = (a.title + " " + a.tags.join(" ") + " " + a.content).toLowerCase();
+      let score = 0;
+      for (const t of terms) if (txt.includes(t)) score += 2;
+      for (const t of a.tags) if (s.includes(t.toLowerCase())) score += 3;
+      if (a.title.toLowerCase().includes(s)) score += 5;
+      return { a, score };
+    }).filter(x => x.score > 0)
+      .sort((x, y) => y.score - x.score)
+      .slice(0, 3)
+      .map(x => ({ title: x.a.title, content: x.a.content }));
+    return scored;
+  }
 
   function log() { try { console.log("[EZTV]", ...arguments); } catch {} }
   function warn() { try { console.warn("[EZTV]", ...arguments); } catch {} }
@@ -87,11 +186,9 @@
         localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
 
         dc = pc.createDataChannel("oai-events");
-        dc.onopen = () => {
-          log("datachannel open");
-          // NOTE: no manual response.create here — server_vad will auto-greet in EN
-        };
+        dc.onopen = () => { log("datachannel open"); /* server_vad will auto-greet */ };
         dc.onerror = (e) => err("datachannel error", e);
+
         dc.onmessage = async (evt) => {
           try {
             const msg = JSON.parse(evt.data);
@@ -126,9 +223,11 @@
 
               if (name === "searchKB") {
                 const q = (args?.query || "").toString();
-                const r = await fetch(backend + "/api/kb?query=" + encodeURIComponent(q));
-                const out = await r.json();
-                const text = (out?.results || []).map(x => `${x.title}: ${x.content}`).join("\n---\n") || "NO_MATCH";
+                // 🚀 Instant local answer (no network wait)
+                const local = localSearchKB(q);
+                const text = (local && local.length)
+                  ? local.map(x => `${x.title}: ${x.content}`).join("\n---\n")
+                  : "NO_MATCH";
                 sendToolOutput(msg.call_id, text);
               }
             }
@@ -179,7 +278,7 @@
     }
 
     btn.addEventListener("click", () => (active ? stop() : start()));
-    log("widget ready (external)");
+    log("widget ready (external, local KB)");
   }
 
   if (document.readyState === "complete" || document.readyState === "interactive") {
