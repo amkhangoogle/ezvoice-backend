@@ -1,8 +1,9 @@
-// public/ezvoice-widget.js — EZTV Voice (Jimmy) with local KB for instant answers
+// /public/ezvoice-widget.js — EZTV Voice (Jimmy) with iOS-safe SDP proxy, greet-on-connect, local KB
 (function () {
-  const backend = "https://ezvoice-backend.vercel.app"; // change if your Vercel URL differs
+  // Change if your Vercel URL differs:
+  const backend = "https://ezvoice-backend.vercel.app";
 
-  // ======= Local KB (mirrors the key public facts for instant answers) =======
+  // ======= Local KB (instant answers; codename-free) =======
   const KB = [
     { title:"Offer basics", tags:["offer","pricing","rates","10 cents","airing","ctv","connected tv","youtube tv"],
       content:`We place ads on Connected TV (e.g., YouTube on TVs). Pricing starts from **10¢ per airing**; exact rates vary by market, inventory, and time of day. No guaranteed outcomes.` },
@@ -88,12 +89,14 @@
     async function start(){
       log("start clicked"); setBtn(true);
       try{
+        // 1) Get ephemeral key
         const sessRes=await fetch(backend+"/api/realtime-session");
         if(!sessRes.ok){ const t=await sessRes.text(); throw new Error("Session fetch failed: "+t); }
         const sess=await sessRes.json();
         const eph=sess.client_secret?.value || sess.client_secret || sess.ephemeral_key;
         if(!eph) throw new Error("Missing ephemeral key");
 
+        // 2) WebRTC wiring
         pc=new RTCPeerConnection();
         pc.ontrack=(e)=>{ audioEl.srcObject=e.streams[0]; };
         pc.oniceconnectionstatechange=()=>{ log("ICE:", pc.iceConnectionState); if(["failed","disconnected"].includes(pc.iceConnectionState)) stop(); };
@@ -135,12 +138,26 @@
           }catch(e){ err("DC message error", e); }
         };
 
+        // 3) Create offer and POST via our iOS-safe proxy
         const offer=await pc.createOffer(); await pc.setLocalDescription(offer);
-        const sdpRes=await fetch("https://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview",{ method:"POST", body:offer.sdp, headers:{ Authorization:"Bearer "+eph, "Content-Type":"application/sdp", "OpenAI-Beta":"realtime=v1" } });
-        if(!sdpRes.ok){ const t=await sdpRes.text(); err("Realtime SDP error", sdpRes.status, t); alert("OpenAI Realtime error "+sdpRes.status+". See Console."); return stop(); }
+        const sdpRes=await fetch(backend + "/api/realtime-sdp", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ sdp: offer.sdp, eph })
+        });
+        if(!sdpRes.ok){
+          const t=await sdpRes.text().catch(()=> "");
+          err("Realtime SDP error (proxy)", sdpRes.status, t);
+          alert("Voice setup error: Load failed");
+          return stop();
+        }
         await pc.setRemoteDescription({ type:"answer", sdp:await sdpRes.text() });
         log("connected");
-      }catch(e){ err("start() failed:", e); alert("Voice setup error: "+(e?.message||String(e))); stop(); }
+      }catch(e){
+        err("start() failed:", e);
+        alert("Voice setup error: " + (e?.message || String(e)));
+        stop();
+      }
     }
 
     function stop(){
@@ -153,7 +170,7 @@
     }
 
     btn.addEventListener("click", ()=> (active ? stop() : start()));
-    log("widget ready (Jimmy, local KB, greet-on-connect)");
+    log("widget ready (Jimmy, iOS-safe proxy, local KB, greet-on-connect)");
   }
 
   if(document.readyState==="complete" || document.readyState==="interactive"){ attach(); }
