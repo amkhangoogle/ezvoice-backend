@@ -1,13 +1,7 @@
-// /api/realtime-sdp.js — proxy SDP offer to OpenAI Realtime (iOS-safe)
+// /api/realtime-sdp.js — proxy SDP offer to OpenAI Realtime (fixes iOS "Failed to fetch")
 export default async function handler(req, res) {
-  // CORS allow-list (add more origins if needed)
-  const allowed = new Set([
-    "https://easytvoffers.com",
-    "https://www.easytvoffers.com",
-  ]);
-  const origin = req.headers.origin || "";
   res.setHeader("Vary", "Origin");
-  res.setHeader("Access-Control-Allow-Origin", allowed.has(origin) ? origin : "null");
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Cache-Control", "no-store");
@@ -18,15 +12,10 @@ export default async function handler(req, res) {
   try {
     // Expect JSON: { sdp: string, eph: string }
     let body = req.body;
-    if (typeof body === "string") {
-      try { body = JSON.parse(body); } catch {}
-    }
+    if (typeof body === "string") { try { body = JSON.parse(body); } catch {} }
     const sdp = body?.sdp;
     const eph = body?.eph;
-
-    if (!sdp || !eph) {
-      return res.status(400).json({ error: "Missing sdp or eph" });
-    }
+    if (!sdp || !eph) return res.status(400).json({ error: "Missing sdp or eph" });
 
     const r = await fetch("https://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview", {
       method: "POST",
