@@ -1,164 +1,154 @@
-// Simple Knowledge Base API for EZTV Voice (brand-sanitized)
-// ✅ Paste as: api/kb.js
+// api/kb.js — EZTV Voice Knowledge Base (expanded, codename-free)
 
-// === Edit/expand these facts anytime (no internal codenames) ===
+// ======= Curated facts from your docs/testimonials =======
 const ARTICLES = [
-  // ─────────── EasyTVOFFERS (core) ───────────
+  // ───────── Offer & Positioning ─────────
   {
     title: "Offer basics",
-    tags: ["pricing","cost","rates","10 cents","ten cents","airing","budget"],
+    tags: ["offer","pricing","cost","rates","10 cents","ten cents","airing","budget","ctv","connected tv","youtube tv"],
     content: `
 We place ads on living-room TV via Connected TV (e.g., YouTube on TVs).
-Pricing starts from **10¢ per airing**; actual rates vary by market, channel inventory, and time-of-day.
-We don't guarantee specific results; we propose a plan after a short discovery call.
+Pricing starts **from 10¢ per airing**; exact rates vary by market, inventory, and time of day.
+We do not guarantee outcomes. We propose a plan after a short discovery call.
     `.trim()
   },
   {
     title: "Channels & coverage",
-    tags: ["CTV","connected tv","youtube tv","living room","national","local","coverage","dayparts"],
+    tags: ["channels","coverage","national","local","targeting","dayparts","inventory"],
     content: `
-Primary channel is YouTube on Connected TV (living-room screens). Placements can be national or local.
-Targeting and dayparts depend on inventory availability for selected markets.
+Primary placements run on YouTube Connected TV (living-room screens). We support national and local coverage.
+Targeting and dayparts depend on market inventory for selected geos.
     `.trim()
   },
   {
-    title: "Turnkey creative & speed",
-    tags: ["creative","script","voiceover","editing","turnkey","72 hours","launch"],
+    title: "Creative & speed",
+    tags: ["creative","script","voiceover","editing","turnkey","launch","72 hours"],
     content: `
-We offer a turnkey infomercial workflow: offer scripting, pro voiceover, and editing.
-Typical turnaround can be as fast as ~72 hours once assets are approved.
+Turnkey workflow: offer scripting, professional voiceover, and editing.
+Typical launch can be ~72 hours after assets are approved.
     `.trim()
   },
   {
-    title: "QR codes & interactivity",
-    tags: ["qr","scan","promo","directions","coupon","engagement"],
+    title: "QR codes & reporting",
+    tags: ["qr","scan","promo","offers","reporting","analytics","time slots","engagement"],
     content: `
-We can embed QR codes in the TV spot for instant actions like special offers, discounts, directions, or opt-ins.
-    `.trim()
-  },
-  {
-    title: "Reporting",
-    tags: ["reporting","analytics","metrics","views","time slots","scans","engagement"],
-    content: `
-We provide real-time reporting: when your ads ran, estimated views, dayparts/time slots, and QR-code scans.
-Use this data to optimize creative and placements.
+Commercials can include QR codes for instant actions (offers, discounts, directions, opt-ins).
+Reporting shows when ads ran, estimated views, dayparts/time slots, and QR scans.
     `.trim()
   },
   {
     title: "Process summary",
-    tags: ["process","how it works","flow","steps","onboarding"],
+    tags: ["process","onboarding","steps","how it works","flow"],
     content: `
-Greet → qualify (industry, location, budget) → capture **name + phone** (email optional) → propose plan → offer a 10–30 min discovery call.
+Greet → qualify (industry, locations, budget) → capture name + phone (email optional) → propose plan → offer a 10–30 minute discovery call.
     `.trim()
   },
+
+  // ───────── Lead Handling & Compliance ─────────
   {
     title: "Lead capture rules",
-    tags: ["lead","contact","phone","email","forms","consent"],
+    tags: ["lead","contact","phone","email","forms","consent","privacy"],
     content: `
-**Required:** name + phone. **Optional:** email. Confirm back briefly (mask phone like (XXX) XXX-1234).
-If the user declines, offer the booking link and end politely.
+Required: name + phone. Optional: email. Confirm back briefly (mask phone like (XXX) XXX-1234).
+If the visitor declines sharing info, offer the booking link and end politely.
     `.trim()
   },
   {
     title: "Compliance",
     tags: ["compliance","privacy","do not call","dncl","sensitive"],
     content: `
-Honor do-not-contact requests. Don't collect sensitive data. Use contact info only for service follow-up.
+Honor do-not-contact requests. Do not collect sensitive data. Use contact info only for service follow-up.
     `.trim()
   },
 
-  // ─────────── Proof (Case studies & Testimonials) ───────────
+  // ───────── Case Studies (from your KB file) ─────────
   {
-    title: "Case studies (highlights)",
-    tags: ["case study","proof","examples","results"],
+    title: "Case study: Math learning center (Macomb, MI)",
+    tags: ["case study","education","mathnasium","lead spike"],
     content: `
-• Mathnasium (Macomb, MI): ~16k+ TV airings in ~30 days; owner reported a noticeable lead spike.
-• Real Estate Agent: ran two campaigns (buyers & sellers); saw new opt-ins and seller leads within days.
-• Michigan Insurance Agency: TV commercial with QR code drove SMS texts and direct inquiries.
-• Amar Pizza: first week produced a mix of calls, SMS, and orders.
-• Halal Food Junkies (influencer): IG reel repurposed for TV; scans & engagement spiked in days.
-• Amy’s Unique Bridal Stages: new bridal leads within weeks.
+~16,435 TV spots in ~30 days. Owner reported a noticeable spike in leads.
     `.trim()
   },
+  {
+    title: "Case study: Local realtor",
+    tags: ["case study","real estate","buyers","sellers","opt-ins"],
+    content: `
+Two campaigns (buyers & sellers) generated website opt-ins and seller leads within days.
+    `.trim()
+  },
+  {
+    title: "Case study: Insurance agency",
+    tags: ["case study","insurance","qr","inquiries","sms"],
+    content: `
+TV commercial with a QR code drove SMS texts and direct client inquiries.
+    `.trim()
+  },
+  {
+    title: "Case study: Restaurant",
+    tags: ["case study","restaurant","orders","calls","sms"],
+    content: `
+First week produced a mix of calls, SMS, and orders (early momentum).
+    `.trim()
+  },
+
+  // ───────── Testimonials (from your transcript highlights) ─────────
   {
     title: "Testimonials (selected)",
     tags: ["testimonial","reviews","social proof"],
     content: `
-• Finjan Café: traffic boost soon after opening.
-• Avenue Hotel (UK): hundreds of inquiries; 27 event bookings worth thousands each.
-• Skin by Kat (spa): ~65% clientele growth in 30 days; moved away from deep-discount sites.
-• Gyro Boys (TX): customers reported “we saw you on TV” within the first week.
+• Skin by Kat (spa): ~65% clientele growth in ~30 days; moved away from deep-discount sites.
+• Avenue Hotel (UK): hundreds of enquiries; 27 confirmed bookings worth thousands each.
+• Gyro Boys (TX): customers came in saying “we saw you on TV.”
+• “Joe”: averaging 4–5 opt-ins per day; traffic is targeted and converting.
     `.trim()
   },
 
-  // ─────────── Booking ───────────
+  // ───────── Booking ─────────
   {
     title: "Discovery booking",
-    tags: ["booking","cal.com","meeting","schedule","link"],
+    tags: ["booking","cal.com","schedule","meeting","discovery","link"],
     content: `
-Use this link to schedule a 10–30 minute discovery call:
-https://cal.com/amkhan/30min
+Use this link for a 10–30 minute discovery call: https://cal.com/amkhan/30min
     `.trim()
   },
 
-  // ─────────── Our platform (codename-free) ───────────
+  // ───────── Sales Playbook (objections & closes) ─────────
   {
-    title: "Our platform: overview",
-    tags: ["platform","overview","product","service"],
+    title: "Sales: objection handling",
+    tags: ["sales","objections","price","budget","timing","convincing","close"],
     content: `
-Our platform helps businesses place TV/radio-style airings across living-room screens with simple setup and transparent reports.
-Typical users are local businesses and agencies; the outcome is predictable placement with clear metrics.
+Common objections & brief responses:
+• "Price/budget": We start from 10¢ per airing and tailor markets/dayparts to your budget.
+• "Will it work?": It depends on creative and market; our case studies show momentum within days or weeks.
+• "We tried TV before": CTV is precise and reportable (QR scans, dayparts, estimates) to guide optimization.
+• "Not ready": No problem—let’s book a quick discovery to outline a right-sized pilot.
     `.trim()
   },
   {
-    title: "Our platform: pricing & plans",
-    tags: ["platform","pricing","plans","cost"],
+    title: "Sales: recommended close",
+    tags: ["sales","closing","next step","assumptive close","calendar"],
     content: `
-Pricing is straightforward and proposal-based for your markets and dayparts.
-For TV/radio placements, pricing still starts **from 10¢ per airing**, varying by market and time.
-    `.trim()
-  },
-  {
-    title: "Our platform: onboarding",
-    tags: ["platform","onboarding","setup","start","process"],
-    content: `
-1) Discovery → 2) Access & assets → 3) Creative/placements plan → 4) Launch.
-Typical turnaround can be ~3–5 business days after assets are approved.
-    `.trim()
-  },
-  {
-    title: "Our platform: targeting & channels",
-    tags: ["platform","channels","coverage","targeting","inventory"],
-    content: `
-Supports Connected TV and related inventory; national + local coverage.
-Targeting depends on market inventory and dayparts for selected geos.
-    `.trim()
-  },
-  {
-    title: "Our platform: measurement & expectations",
-    tags: ["platform","results","roi","kpi","measurement","attribution"],
-    content: `
-No guaranteed outcomes. Typical KPIs: leads, calls, site visits, or QR scans.
-We align expectations during the discovery call and tailor the plan to budget and market.
+Close with one clear question: 
+"Would a quick 10-minute discovery call help tailor a plan for your market?"
+If yes: ask "today or tomorrow?" and propose two time windows. If no: offer the booking link and a brief follow-up.
     `.trim()
   }
 ];
 
-// ——— query normalization so if someone says the old codename, we answer generically ———
+// —— tiny synonym guard: treat old codenames as “platform” ——
 function normalizeQuery(q) {
-  const s = (q || "").toLowerCase();
-  return s.replace(/\bnedzo\b/g, "platform"); // map the codename to neutral concept
+  return (q || "").toLowerCase().replace(/\bnedzo\b/g, "platform");
 }
 
-// ——— tiny search helper ———
+// —— search helper ——
 function searchKB(query) {
   const q = normalizeQuery(query).trim();
   if (!q) return [];
   const terms = q.split(/\s+/).filter(Boolean);
   const scored = ARTICLES.map(a => {
-    const text = (a.title + " " + a.tags.join(" ") + " " + a.content).toLowerCase();
+    const txt = (a.title + " " + a.tags.join(" ") + " " + a.content).toLowerCase();
     let score = 0;
-    for (const t of terms) if (text.includes(t)) score += 2;
+    for (const t of terms) if (txt.includes(t)) score += 2;
     for (const t of a.tags) if (q.includes(t.toLowerCase())) score += 3;
     if (a.title.toLowerCase().includes(q)) score += 5;
     return { a, score };
@@ -170,7 +160,7 @@ function searchKB(query) {
 }
 
 export default async function handler(req, res) {
-  // CORS (loosen or lock as you wish)
+  // CORS (loosen during testing; lock later if desired)
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
