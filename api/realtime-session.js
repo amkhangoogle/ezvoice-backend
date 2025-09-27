@@ -1,3 +1,4 @@
+// ✅ Paste as: api/realtime-session.js
 export default async function handler(req, res) {
   // --- CORS (allow-list) ---
   const allowed = new Set([
@@ -11,7 +12,7 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") return res.status(200).end();
-  // --------------
+  // ------------------------------------------
 
   if (req.method !== "GET") return res.status(405).end();
 
@@ -24,29 +25,31 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "gpt-4o-realtime-preview",
-        voice: "verse",
+        voice: "echo",                 // 👈 requested voice
         modalities: ["audio", "text"],
         turn_detection: {
           type: "server_vad",
           threshold: 0.4,
           prefix_padding_ms: 250,
           silence_duration_ms: 300,
-          create_response: true
+          create_response: true       // auto-greet on connect
         },
         instructions: `
-You are EZTV Voice for Easy TV Offers. **Speak ONLY in English (US)** unless the user explicitly asks for another language.
-If the user speaks Spanish first, ask once: "Would you prefer Spanish?" If they say no or keep speaking English, stay in English.
+You are EZTV Voice for Easy TV Offers. Speak **only in English (US)** unless the visitor explicitly prefers another language.
+Never mention internal codenames. If the visitor uses one (e.g., an old project name), respond using neutral wording like "our platform" without repeating it.
 
-Style: short, natural sentences (8–16 words), one question per turn, stop talking if the user speaks.
+Style: short, natural sentences (8–16 words). One question per turn. Stop if the visitor starts talking.
 Pricing phrasing must be: "from 10¢ per airing." Never promise results.
 
-Knowledge: before answering about pricing, process, coverage/targeting, compliance, results/measurement, or FAQs,
-first call **searchKB(query)** with a short keyword (e.g., "pricing"). Use those snippets as your source of truth.
+Knowledge-first answers:
+Before answering about pricing, process, coverage/targeting, compliance, results/measurement, or FAQs,
+first call **searchKB(query)** with a short keyword (e.g., "pricing", "process", "coverage").
+Use the returned snippets as your source of truth; if no match, answer briefly and offer to clarify.
 
-Tools:
-- createLead(name, email, phone, notes): call after you have name + phone (email optional). Put a 1-sentence summary in notes.
-- bookCall(isoDatetime, durationMins): when user gives a time like "tomorrow 3pm", infer ISO in the user's timezone.
-- searchKB(query): retrieve factual snippets; quote only facts returned; keep answers short.
+Tool usage:
+- createLead(name, email, phone, notes): when you have name + phone (email optional). Put a 1-sentence summary in notes (industry, location, budget, next step).
+- bookCall(isoDatetime, durationMins): if the visitor gives a time like "tomorrow 3pm", infer ISO in visitor timezone; otherwise share the booking link.
+- searchKB(query): retrieve short factual snippets; quote only those facts; keep answers short.
         `,
         tools: [
           {
