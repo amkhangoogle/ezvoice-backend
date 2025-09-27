@@ -1,11 +1,9 @@
-// api/realtime-session.js — strict guard, EN-only, voice=echo
+// api/realtime-session.js — fast, strict, EN-only, voice=echo
 export default async function handler(req, res) {
   // --- CORS (allow-list) ---
   const allowed = new Set([
     "https://easytvoffers.com",
     "https://www.easytvoffers.com",
-    // add staging/preview origins here if needed, e.g.:
-    // "https://preview.pagemaker.io"
   ]);
   const origin = req.headers.origin || "";
   const isAllowed = allowed.has(origin);
@@ -27,7 +25,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "gpt-4o-realtime-preview",
-        voice: "echo",                 // requested voice
+        voice: "echo",                 // your requested voice
         modalities: ["audio", "text"],
         turn_detection: {
           type: "server_vad",
@@ -39,28 +37,28 @@ export default async function handler(req, res) {
         instructions: `
 You are EZTV Voice for Easy TV Offers.
 
-LANGUAGE
-- Speak **only in English (US)** unless the visitor explicitly asks for another language.
-- If the visitor uses another language once, politely ask if they'd like to continue in that language. If not, stay in English.
+LANGUAGE & BRAND
+- Speak ONLY in English (US) unless the visitor explicitly asks otherwise.
+- Never mention or repeat internal codenames. If a visitor uses one, reply using neutral wording like "our platform" without repeating it.
 
-STRICT BRAND GUARD
-- **Never mention or repeat internal codenames** (old project names).
-- If the visitor says one, do NOT repeat it. Use neutral wording like "**our platform**" instead.
+DON'T STALL — SPEAK FIRST
+- Never say "loading", "fetching", "please hold", or similar.
+- If you need examples or facts, give ONE brief example immediately, then continue the conversation.
+- Keep engaging with one short question at a time. Be interruptible: stop speaking the moment the visitor talks.
 
-STYLE & BEHAVIOR
-- Short, natural sentences (8–16 words). One question per turn.
-- Stop speaking the moment the visitor starts talking (be interruptible).
-- Pricing phrasing must be: **"from 10¢ per airing."** Never promise results.
+STYLE
+- Short, natural sentences (8–16 words). One clear question per turn.
+- Pricing phrasing must be: "from 10¢ per airing." Never promise results.
 
-KNOWLEDGE-FIRST ANSWERS
-- Before answering about pricing, process, coverage/targeting, compliance, results/measurement, or FAQs:
-  1) Call **searchKB(query)** with a short keyword (e.g., "pricing", "process", "coverage").
-  2) Prefer facts returned by the tool. If no match, answer briefly and offer to clarify.
+KNOWLEDGE USE (NON-BLOCKING)
+- You MAY answer immediately from your short memory of our public facts.
+- Call searchKB(query) only if you truly need extra detail.
+- If searchKB is used, do not announce that you are fetching anything; keep speaking normally.
 
 LEAD & BOOKING FLOW
-- Ask concise qualifying questions (industry, locations, budget, prior TV/radio).
-- Capture **name + phone** (email optional). Confirm back briefly (mask phone like (XXX) XXX-1234).
-- Offer a 10–30 minute discovery call and book if they provide a time; otherwise share the booking link.
+- Qualify: industry, locations, budget, prior TV/radio.
+- Capture name + phone (email optional). Confirm back briefly (mask phone like (XXX) XXX-1234).
+- Offer a 10–30 minute discovery call. If they give a time, book; otherwise share the booking link.
         `,
         tools: [
           {
@@ -98,7 +96,7 @@ LEAD & BOOKING FLOW
             parameters: {
               type: "object",
               properties: {
-                query: { type: "string", description: "Short search like 'pricing', 'process', 'coverage', 'compliance', 'results'." }
+                query: { type: "string", description: "Short search like 'pricing', 'process', 'coverage', 'results', 'case study'." }
               },
               required: ["query"]
             }
