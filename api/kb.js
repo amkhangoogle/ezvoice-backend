@@ -1,92 +1,75 @@
 // Simple Knowledge Base API for EZTV Voice
-// Edit ARTICLES to include your real facts / playbooks
+// ✅ Paste this as: api/kb.js
 
+// === Edit/expand these facts anytime ===
 const ARTICLES = [
+  // ─────────── EasyTVOFFERS (core) ───────────
   {
     title: "Offer basics",
-    tags: ["pricing","cost","rates","offer","10 cents","ten cents"],
+    tags: ["pricing","cost","rates","10 cents","ten cents","airing","budget"],
     content: `
-We buy TV/radio airings. Pricing starts **from 10¢ per airing**; actual rates vary by market, inventory and time of day.
-We do not guarantee results. We propose a plan after a short discovery call.
+We place your ads on living-room TV via Connected TV (YouTube on TVs).
+Pricing starts from **10¢ per airing**; actual rates vary by market, channel inventory, and time-of-day.
+We don't guarantee specific results; we propose a plan after a short discovery call.
     `.trim()
   },
   {
-    title: "Discovery flow",
-    tags: ["process","how it works","call","booking","cal.com"],
+    title: "Channels & coverage",
+    tags: ["CTV","connected tv","youtube tv","living room","national","local","coverage","dayparts"],
     content: `
-Quick path: greet → qualify (industry, location, budget) → capture name & phone (email optional) → offer a 10-min discovery call.
-Calls are booked at: https://cal.com/amkhan/30min
+Primary channel is YouTube on Connected TV (living-room screens). Placements can be national or local.
+Targeting and dayparts depend on inventory availability for the selected markets.
     `.trim()
   },
   {
-    title: "Coverage & targeting",
-    tags: ["coverage","targeting","national","local","geo"],
+    title: "Turnkey creative & speed",
+    tags: ["creative","script","voiceover","editing","turnkey","72 hours","launch"],
     content: `
-We can place **national** or **local** airings. Targeting and dayparts depend on channel and inventory availability.
+We offer a turnkey infomercial workflow: offer scripting, pro voiceover, and editing.
+Typical turnaround can be as fast as ~72 hours once assets are approved.
     `.trim()
   },
   {
-    title: "Compliance",
-    tags: ["consent","privacy","do not call","dncl","security"],
+    title: "QR codes & interactivity",
+    tags: ["qr","scan","promo","directions","coupon","engagement"],
     content: `
-We honor do-not-call. Do not collect sensitive data. Use contact info only to follow up about services.
+We can embed QR codes in the TV spot for instant actions like special offers, discounts, directions, or opt-ins.
     `.trim()
   },
   {
-    title: "FAQ: results & measurement",
-    tags: ["results","roi","attribution","performance"],
+    title: "Reporting",
+    tags: ["reporting","analytics","metrics","views","time slots","scans","engagement"],
     content: `
-Results vary by creative, market and spend. We discuss expectations and measurement approach on the discovery call.
+We provide real-time reporting: when your ads ran, estimated views, dayparts/time slots, and QR-code scans.
+Use this data to optimize creative and placements.
+    `.trim()
+  },
+  {
+    title: "Process summary",
+    tags: ["process","how it works","flow","steps","onboarding"],
+    content: `
+Greet → qualify (industry, location, budget) → capture **name + phone** (email optional) → propose plan → offer a 10–30 min discovery call.
     `.trim()
   },
   {
     title: "Lead capture rules",
-    tags: ["lead","contact","phone","email"],
+    tags: ["lead","contact","phone","email","forms","consent"],
     content: `
 **Required:** name + phone. **Optional:** email. Confirm back briefly (mask phone like (XXX) XXX-1234).
-If user declines, offer booking link and end politely.
+If the user declines, offer the booking link and end politely.
     `.trim()
-  }
-];
+  },
+  {
+    title: "Compliance",
+    tags: ["compliance","privacy","do not call","dncl","sensitive"],
+    content: `
+Honor do-not-contact requests. Don't collect sensitive data. Use contact info only for service follow-up.
+    `.trim()
+  },
 
-// --- tiny search helper ---
-function searchKB(query) {
-  const q = (query || "").toLowerCase().trim();
-  if (!q) return [];
-  const terms = q.split(/\s+/).filter(Boolean);
-  const scored = ARTICLES.map(a => {
-    const text = (a.title + " " + a.tags.join(" ") + " " + a.content).toLowerCase();
-    let score = 0;
-    for (const t of terms) {
-      if (text.includes(t)) score += 2;
-    }
-    for (const t of a.tags) {
-      if (q.includes(t.toLowerCase())) score += 3;
-    }
-    if (a.title.toLowerCase().includes(q)) score += 5;
-    return { a, score };
-  }).filter(x => x.score > 0)
-    .sort((x,y)=> y.score - x.score)
-    .slice(0, 3)
-    .map(x => ({
-      title: x.a.title,
-      content: x.a.content
-    }));
-  return scored;
-}
-
-export default async function handler(req, res) {
-  // CORS
-  res.setHeader("Access-Control-Allow-Origin", "*"); // later: lock to your domain
-  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  if (req.method === "OPTIONS") return res.status(200).end();
-
-  if (req.method !== "GET") return res.status(405).json({ ok:false, error:"Method not allowed" });
-
-  const query = (req.query?.query || req.query?.q || "").toString();
-  if (!query) return res.status(400).json({ ok:false, error:"Missing ?query=" });
-
-  const results = searchKB(query);
-  return res.status(200).json({ ok:true, count: results.length, results });
-}
+  // ─────────── Proof (Case studies & Testimonials) ───────────
+  {
+    title: "Case studies (highlights)",
+    tags: ["case study","proof","examples","results"],
+    content: `
+• Mathnasium (M
