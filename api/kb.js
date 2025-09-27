@@ -72,4 +72,109 @@ Honor do-not-contact requests. Don't collect sensitive data. Use contact info on
     title: "Case studies (highlights)",
     tags: ["case study","proof","examples","results"],
     content: `
-• Mathnasium (M
+• Mathnasium (Macomb, MI): ~16k+ TV airings in ~30 days; owner reported a noticeable lead spike.
+• Real Estate Agent: ran two campaigns (buyers & sellers); saw new opt-ins and seller leads within days.
+• Michigan Insurance Agency: TV commercial with QR code drove SMS texts and direct inquiries.
+• Amar Pizza: first week produced a mix of calls, SMS, and orders.
+• Halal Food Junkies (influencer): IG reel repurposed for TV; scans & engagement spiked in days.
+• Amy’s Unique Bridal Stages: new bridal leads within weeks.
+    `.trim()
+  },
+  {
+    title: "Testimonials (selected)",
+    tags: ["testimonial","reviews","social proof"],
+    content: `
+• Finjan Café: traffic boost soon after opening.
+• Avenue Hotel (UK): hundreds of inquiries; 27 event bookings worth thousands each.
+• Skin by Kat (spa): ~65% clientele growth in 30 days; moved away from deep-discount sites.
+• Gyro Boys (TX): customers reported “we saw you on TV” within the first week.
+    `.trim()
+  },
+
+  // ─────────── Booking ───────────
+  {
+    title: "Discovery booking",
+    tags: ["booking","cal.com","meeting","schedule","link"],
+    content: `
+Use this link to schedule a 10–30 minute discovery call:
+https://cal.com/amkhan/30min
+    `.trim()
+  },
+
+  // ─────────── Nedzo (fill in your specifics) ───────────
+  {
+    title: "Nedzo: What it is",
+    tags: ["nedzo","overview","platform","product","service"],
+    content: `
+[EDIT ME] Nedzo is your <one-line definition>. Typical users are <who>. Primary outcome: <what they get>.
+Keep this factual and short so the voice agent can quote it reliably.
+    `.trim()
+  },
+  {
+    title: "Nedzo: Pricing & plans",
+    tags: ["nedzo","pricing","plans","cost"],
+    content: `
+[EDIT ME] Pricing structure: <facts only>. Discounts: <yes/no>. Setup fees: <yes/no>. Trial: <yes/no, length>.
+Note: EZTV TV/radio airings pricing still uses **from 10¢ per airing**, varies by market and time.
+    `.trim()
+  },
+  {
+    title: "Nedzo: Onboarding",
+    tags: ["nedzo","onboarding","setup","start","process"],
+    content: `
+[EDIT ME] 1) Discovery → 2) Access & assets → 3) Creative/placements plan → 4) Launch.
+Turnaround: <e.g., 3–5 business days after assets>. Required assets: <list>.
+    `.trim()
+  },
+  {
+    title: "Nedzo: Targeting & channels",
+    tags: ["nedzo","channels","coverage","targeting","inventory"],
+    content: `
+[EDIT ME] Supported channels: <e.g., TV, radio, OTT/CTV, streaming audio>. Coverage: national + local.
+Targeting depends on inventory and dayparts for selected markets.
+    `.trim()
+  },
+  {
+    title: "Nedzo: Measurement & expectations",
+    tags: ["nedzo","results","roi","kpi","measurement","attribution"],
+    content: `
+[EDIT ME] No guaranteed outcomes. Typical KPIs: <leads/calls/visits>. Measurement approach: <brief>.
+Set expectations on the discovery call; tailor plan to budget and market.
+    `.trim()
+  }
+];
+
+// ─── tiny search helper ───
+function searchKB(query) {
+  const q = (query || "").toLowerCase().trim();
+  if (!q) return [];
+  const terms = q.split(/\s+/).filter(Boolean);
+  const scored = ARTICLES.map(a => {
+    const text = (a.title + " " + a.tags.join(" ") + " " + a.content).toLowerCase();
+    let score = 0;
+    for (const t of terms) if (text.includes(t)) score += 2;
+    for (const t of a.tags) if (q.includes(t.toLowerCase())) score += 3;
+    if (a.title.toLowerCase().includes(q)) score += 5;
+    return { a, score };
+  }).filter(x => x.score > 0)
+    .sort((x,y)=> y.score - x.score)
+    .slice(0, 3)
+    .map(x => ({ title: x.a.title, content: x.a.content }));
+  return scored;
+}
+
+export default async function handler(req, res) {
+  // CORS (allow your domains; loosen during testing if needed)
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") return res.status(200).end();
+
+  if (req.method !== "GET") return res.status(405).json({ ok:false, error:"Method not allowed" });
+
+  const query = (req.query?.query || req.query?.q || "").toString();
+  if (!query) return res.status(400).json({ ok:false, error:"Missing ?query=" });
+
+  const results = searchKB(query);
+  return res.status(200).json({ ok:true, count: results.length, results });
+}
