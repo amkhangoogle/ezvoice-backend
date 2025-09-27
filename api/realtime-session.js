@@ -1,10 +1,9 @@
-// api/realtime-session.js — Jimmy, persuasive consultative style, EN-only, voice=echo
+// /api/realtime-session.js — Jimmy, EN-only, voice=echo, auto replies enabled
 export default async function handler(req, res) {
-  // --- CORS (allow-list) ---
+  // --- CORS allow-list ---
   const allowed = new Set([
     "https://easytvoffers.com",
     "https://www.easytvoffers.com",
-    // add staging if needed: "https://preview.pagemaker.io"
   ]);
   const origin = req.headers.origin || "";
   const isAllowed = allowed.has(origin);
@@ -12,9 +11,8 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", isAllowed ? origin : "null");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Cache-Control", "no-store");
   if (req.method === "OPTIONS") return res.status(200).end();
-  // ------------------------------------------
-
   if (req.method !== "GET") return res.status(405).end();
 
   try {
@@ -26,55 +24,57 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "gpt-4o-realtime-preview",
-        voice: "echo",
+        voice: "echo",                   // keep Echo; we style in instructions
         modalities: ["audio", "text"],
-        // Manual greet from the widget to avoid duplicates
+
+        // ✅ Auto-reply after each detected user turn (fixes “stalls after greeting”)
         turn_detection: {
           type: "server_vad",
           threshold: 0.35,
           prefix_padding_ms: 220,
-          silence_duration_ms: 240,
-          create_response: false
+          silence_duration_ms: 260,
+          create_response: true,        // <— IMPORTANT
+          interrupt_response: true
         },
+
+        // Keep responses snappy
+        temperature: 0.8,
+        max_response_output_tokens: 600,
+
         instructions: `
 You are **Jimmy**, the voice concierge for Easy TV Offers.
 
-LANGUAGE & BRAND GUARD
+LANGUAGE & BRAND
 - Speak ONLY in English (US) unless the visitor explicitly asks otherwise.
-- Never mention or repeat internal codenames. If a visitor uses one, respond using "our platform" without repeating it.
+- Never mention or repeat internal codenames; say "our platform" instead.
 
 DELIVERY (UPBEAT & SLIGHTLY FASTER)
-- Friendly, confident, and consultative. Smile in your voice.
+- Friendly, confident, and persuasive—smile in your voice.
 - Pace ~10–15% faster than neutral; clear diction; concise.
-- Vary pitch slightly to avoid sounding flat.
-
-CONVERSATION STYLE
-- One short idea per sentence (8–16 words). One question per turn.
-- Be interruptible: stop talking the moment the visitor starts.
-- Never say "loading", "fetching", or "please hold". If you need examples, give one quickly and keep engaging.
+- Short sentences (8–16 words). One question per turn.
+- Be interruptible: stop the moment the visitor starts speaking.
+- Never say "loading" or "fetching".
 
 PRICING & CLAIMS
-- Pricing phrasing must be: **"from 10¢ per airing."**
-- Do not promise results. Use social proof instead.
+- Pricing phrasing: **"from 10¢ per airing."** No guarantees or promises.
 
 CONSULTATIVE SALES PLAYBOOK
 - Diagnose first: industry, locations, budget, prior TV/radio.
-- Use benefit → proof → question pattern:
-  • Benefit: what they gain (reach, living-room presence, reporting, QR interactivity).
-  • Proof: a brief, relevant case study or testimonial from our knowledge.
-  • Question: a simple next-step ask ("want to try a short pilot?").
+- Benefit → proof → question pattern:
+  • Benefit (reach, living-room presence, reporting, QR interactivity)
+  • Proof (brief case study or testimonial)
+  • Question (simple next-step ask)
 - Handle objections briefly (price, timing, past failures) and pivot to a discovery call.
 
-CLOSE FOR THE APPOINTMENT
-- After interest, ask: "Would a quick 10-minute discovery call help tailor a plan for your market?"
-- If yes: offer "today or tomorrow?" and confirm a time to book.
-- If no time is given: provide the booking link and ask permission to text/email it.
+LEAD & BOOKING
+- Capture **name + phone** (email optional). Confirm briefly (mask phone like (XXX) XXX-1234).
+- Offer a 10–30 minute discovery call. If they give a time, book; otherwise share the booking link.
 
-KNOWLEDGE USE (NON-BLOCKING)
+KNOWLEDGE USE
 - You MAY answer immediately from known public facts.
-- Call **searchKB(query)** only if extra detail is necessary.
-- Do not announce tool usage; keep speaking naturally.
+- Call **searchKB(query)** only if needed; do not announce tool usage.
         `,
+
         tools: [
           {
             type: "function",
@@ -85,7 +85,7 @@ KNOWLEDGE USE (NON-BLOCKING)
               properties: {
                 name:  { type: "string", description: "Full name" },
                 email: { type: "string" },
-                phone: { type: "string", description: "E.164 if possible; assume +1 if not provided" },
+                phone: { type: "string", description: "E.164 if possible; assume +1 if missing" },
                 notes: { type: "string", description: "One-sentence summary: industry, location, budget, next step" }
               },
               required: ["name", "phone"]
@@ -93,40 +93,3 @@ KNOWLEDGE USE (NON-BLOCKING)
           },
           {
             type: "function",
-            name: "bookCall",
-            description: "Book a discovery call on Cal.com",
-            parameters: {
-              type: "object",
-              properties: {
-                isoDatetime:  { type: "string", description: "ISO 8601 start time inferred from user phrase" },
-                durationMins: { type: "number", default: 15 }
-              },
-              required: ["isoDatetime"]
-            }
-          },
-          {
-            type: "function",
-            name: "searchKB",
-            description: "Look up short, factual snippets from the EZTV knowledge base",
-            parameters: {
-              type: "object",
-              properties: {
-                query: { type: "string", description: "Short search like 'pricing', 'process', 'coverage', 'results', 'case study', 'testimonial'." }
-              },
-              required: ["query"]
-            }
-          }
-        ]
-      })
-    });
-
-    if (!r.ok) {
-      const text = await r.text();
-      return res.status(500).send(text);
-    }
-    const session = await r.json();
-    return res.status(200).json(session);
-  } catch (e) {
-    return res.status(500).json({ error: String(e?.message || e) });
-  }
-}
