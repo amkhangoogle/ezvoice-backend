@@ -1,7 +1,6 @@
-// /public/ezvoice-widget.js — EZTV Voice (Jimmy) with iOS-safe SDP proxy, greet-on-connect, local KB
+// /public/ezvoice-widget.js — EZTV Voice (Jimmy) with iOS-safe proxy, greet-on-connect, local KB
 (function () {
-  // Change if your Vercel URL differs:
-  const backend = "https://ezvoice-backend.vercel.app";
+  const backend = "https://ezvoice-backend.vercel.app"; // change if your Vercel URL differs
 
   // ======= Local KB (instant answers; codename-free) =======
   const KB = [
@@ -38,12 +37,11 @@
     { title:"Sales: recommended close", tags:["sales","closing","next step","calendar"],
       content:`"Would a quick 10-minute discovery call help tailor a plan for your market?" If yes: today or tomorrow? If no: here’s the link to book anytime.` }
   ];
-
-  function normalizeQuery(q){ return (q||"").toLowerCase().replace(/\bnedzo\b/g,"platform"); }
+  function norm(q){ return (q||"").toLowerCase().replace(/\bnedzo\b/g,"platform"); }
   function localSearchKB(q){
-    const s = normalizeQuery(q).trim(); if(!s) return [];
+    const s = norm(q).trim(); if(!s) return [];
     const terms = s.split(/\s+/).filter(Boolean);
-    const scored = KB.map(a=>{
+    return KB.map(a=>{
       const txt=(a.title+" "+a.tags.join(" ")+" "+a.content).toLowerCase();
       let score=0;
       for(const t of terms) if(txt.includes(t)) score+=2;
@@ -51,12 +49,10 @@
       if(a.title.toLowerCase().includes(s)) score+=5;
       return {a,score};
     }).filter(x=>x.score>0).sort((x,y)=>y.score-x.score).slice(0,3).map(x=>({title:x.a.title,content:x.a.content}));
-    return scored;
   }
 
-  // ======= UI + Realtime glue (greet-on-connect) =======
+  // ======= UI + Realtime glue =======
   function log(){ try{ console.log("[EZTV]", ...arguments);}catch{} }
-  function warn(){ try{ console.warn("[EZTV]", ...arguments);}catch{} }
   function err(){ try{ console.error("[EZTV]", ...arguments);}catch{} }
 
   function ensureUI(){
@@ -68,7 +64,7 @@
     let btn=document.getElementById("eztv-voice-btn");
     if(!btn){ btn=document.createElement("button"); btn.id="eztv-voice-btn"; btn.textContent="Talk to EZTV Voice";
       btn.style.cssText="background:#10b981;color:#fff;border:none;border-radius:9999px;padding:12px 18px;box-shadow:0 8px 24px rgba(0,0,0,.2);cursor:pointer;"; root.appendChild(btn); }
-    return {root,audioEl,btn};
+    return {audioEl,btn};
   }
 
   function attach(){
@@ -79,15 +75,11 @@
     function setBtn(on){ active=on; btn.textContent=on?"Stop • EZTV Voice":"Talk to EZTV Voice"; btn.style.background=on?"#ef4444":"#10b981"; }
     function bufDelta(m){ const id=m.call_id; const cur=toolBuf.get(id)||{name:m.name,args:{}}; if(m.arguments) Object.assign(cur.args,m.arguments); if(!cur.name) cur.name=m.name; toolBuf.set(id,cur); }
     function flushArgs(id){ const cur=toolBuf.get(id)||{args:{}}; toolBuf.delete(id); return cur; }
-    function sendToolOutput(call_id, output){ try{ dc && dc.send(JSON.stringify({type:"response.function_call_output", call_id, output})); }catch(e){ warn("sendToolOutput", e); } }
-
-    function greetOnce(){
-      if(greeted || !dc || dc.readyState!=="open") return;
-      try{ dc.send(JSON.stringify({ type:"response.create" })); greeted=true; log("auto-greet sent"); }catch(e){ warn("auto-greet send failed", e); }
-    }
+    function sendToolOutput(call_id, output){ try{ dc && dc.send(JSON.stringify({type:"response.function_call_output", call_id, output})); }catch(e){ err("sendToolOutput", e); } }
+    function greetOnce(){ if(greeted || !dc || dc.readyState!=="open") return; try{ dc.send(JSON.stringify({ type:"response.create" })); greeted=true; log("auto-greet sent"); }catch(e){ err("auto-greet", e); } }
 
     async function start(){
-      log("start clicked"); setBtn(true);
+      setBtn(true);
       try{
         // 1) Get ephemeral key
         const sessRes=await fetch(backend+"/api/realtime-session");
@@ -135,10 +127,10 @@
                 sendToolOutput(msg.call_id, text);
               }
             }
-          }catch(e){ err("DC message error", e); }
+          }catch(e){ err("DC message", e); }
         };
 
-        // 3) Create offer and POST via our iOS-safe proxy
+        // 3) Create offer and POST via iOS-safe proxy
         const offer=await pc.createOffer(); await pc.setLocalDescription(offer);
         const sdpRes=await fetch(backend + "/api/realtime-sdp", {
           method:"POST",
@@ -147,15 +139,15 @@
         });
         if(!sdpRes.ok){
           const t=await sdpRes.text().catch(()=> "");
-          err("Realtime SDP error (proxy)", sdpRes.status, t);
-          alert("Voice setup error: Load failed");
+          err("SDP proxy failed", sdpRes.status, t);
+          alert("Voice setup error: Failed to fetch");
           return stop();
         }
         await pc.setRemoteDescription({ type:"answer", sdp:await sdpRes.text() });
         log("connected");
       }catch(e){
-        err("start() failed:", e);
-        alert("Voice setup error: " + (e?.message || String(e)));
+        err("start() failed", e);
+        alert("Voice setup error: " + (e?.message || "Failed to fetch"));
         stop();
       }
     }
@@ -165,12 +157,12 @@
         if(dc){ try{ dc.close(); }catch{} dc=null; }
         if(pc){ try{ pc.getSenders().forEach(s=> s.track && s.track.stop()); }catch{} try{ pc.close(); }catch{} pc=null; }
         if(localStream){ try{ localStream.getTracks().forEach(t=>t.stop()); }catch{} localStream=null; }
-        try{ if(audioEl) audioEl.srcObject=null; }catch{}
+        try{ audioEl.srcObject=null; }catch{}
       }finally{ greeted=false; setBtn(false); }
     }
 
     btn.addEventListener("click", ()=> (active ? stop() : start()));
-    log("widget ready (Jimmy, iOS-safe proxy, local KB, greet-on-connect)");
+    log("widget ready (Jimmy, proxy, local KB, greet-on-connect)");
   }
 
   if(document.readyState==="complete" || document.readyState==="interactive"){ attach(); }
