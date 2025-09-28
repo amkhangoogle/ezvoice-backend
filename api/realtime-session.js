@@ -1,6 +1,5 @@
-// /api/realtime-session.js — Jimmy (EN-only), upbeat & persuasive, auto-replies ON
+// /api/realtime-session.js — Jimmy (EN), upbeat & persuasive, auto-replies, doc tool
 export default async function handler(req, res) {
-  // Open CORS while stabilizing
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
@@ -9,31 +8,13 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "GET") return res.status(405).end();
 
-  // 🔹 Quick inline knowledge so the agent answers instantly (no tool delays)
   const FAST_FACTS = `
-Offer & Pricing
-- We place ads on Connected TV (e.g., YouTube on TVs).
-- Pricing starts **from 10¢ per airing**; rates vary by market, inventory, and time of day.
-- We never guarantee results.
-
-Coverage & Creative
-- National or local coverage; dayparts depend on inventory.
-- Turnkey creative: scripting, pro voiceover, editing. Launch can be ~72 hours after approval.
-- QR codes supported; reporting shows when ads ran, estimated views, dayparts, and QR scans.
-
-Sales Proof (brief)
-- Math learning center (Macomb, MI): ~16,435 spots in ~30 days; spike in leads reported.
-- Local realtor: opt-ins and seller leads within days.
-- Insurance agency: QR TV ad produced texts and direct inquiries.
-- Restaurant: first week saw calls, texts, and orders.
-
-Process
-- Qualify (industry, locations, budget) → capture name + phone (email optional) → propose plan →
-  offer a 10–30 minute discovery call (Cal link: https://cal.com/amkhan/30min).
-
-Compliance
-- Honor do-not-contact; don’t collect sensitive data; use contact info only for service follow-up.
-  `.trim();
+Offer & Pricing: Connected TV placements (e.g., YouTube on TVs). Pricing from 10¢ per airing; varies by market, inventory, time of day. No guarantees.
+Coverage & Creative: National or local coverage; dayparts depend on inventory. Turnkey creative; launch can be ~72 hours after approval. QR codes supported; reporting includes runs, estimated views, dayparts, and QR scans.
+Proof: Education center saw ~16,435 airings in ~30 days with a lead spike. Realtor got seller leads within days. Insurance agency's QR TV ad drove texts and direct inquiries. Restaurants saw orders within first week.
+Process: Qualify → capture name + phone → propose plan → offer 10–30 minute discovery call (https://cal.com/amkhan/30min).
+Compliance: Respect do-not-contact; avoid sensitive data; use contact info only for service follow-up.
+`.trim();
 
   try {
     const r = await fetch("https://api.openai.com/v1/realtime/sessions", {
@@ -44,9 +25,8 @@ Compliance
       },
       body: JSON.stringify({
         model: "gpt-4o-realtime-preview",
-        voice: "echo",                 // voice
-        modalities: ["audio","text"],  // audio + text
-        // ✅ Auto reply after each user turn (no “stalling”)
+        voice: "echo",
+        modalities: ["audio","text"],
         turn_detection: {
           type: "server_vad",
           threshold: 0.35,
@@ -59,41 +39,43 @@ Compliance
         max_response_output_tokens: 500,
         instructions: `
 You are **Jimmy**, the voice concierge for Easy TV Offers.
-Speak **only English (US)** unless the visitor explicitly asks otherwise.
-Never mention internal codenames; say "our platform."
+Speak only English (US). Never mention internal codenames; say "our platform."
 
 TONE & PACE
-- Friendly, energetic, confident. Smile in your voice.
-- Speak ~10–15% faster than neutral; clear, short sentences (8–16 words).
-- Ask one simple question per turn. Be interruptible.
+- Friendly, energetic, confident. Speak ~10–15% faster than neutral.
+- Short sentences (8–16 words). One question per turn. Be interruptible.
 
-FACTS TO USE (concise, natural):
+CORE FACTS (summarize naturally if asked):
 ${FAST_FACTS}
 
-PRICING & CLAIMS
-- Always phrase pricing as "from 10¢ per airing."
-- Never promise results; use brief proof points instead.
+SALES FLOW
+- Diagnose: industry, locations, budget, prior TV/radio.
+- Benefit → proof → question. Use brief proof from our facts or docs.
+- Pricing language: "from 10¢ per airing." Never promise results.
+- Close: "Would a quick 10-minute discovery call help tailor a plan?"
+  Offer two windows ("today or tomorrow?"); otherwise share the Cal link.
 
-CONSULTATIVE SALES FLOW
-1) Diagnose: industry, locations, budget, prior TV/radio.
-2) Benefit → proof → question:
-   - Benefit: living-room reach, precise reporting, QR interactivity.
-   - Proof: one short case study above.
-   - Question: "Want to try a short pilot?" or "Want a 10-minute discovery call?"
-3) Capture **name + phone** (email optional). Confirm briefly (mask phone like (XXX) XXX-1234).
-4) Offer two booking windows: "today or tomorrow?" If no time, share the Cal.com link.
-
-KEEP IT MOVING
-- If you don’t know an answer, give the closest helpful guidance and pivot to booking.
-- Never say "loading" or "fetching."
+DOCS USE
+- If a question needs specifics beyond the core facts, call **searchDocs(query)**.
+- Do not announce you are searching. Keep talking naturally and answer succinctly.
         `,
-
-        // Optional function hooks (fast stubs on your side)
         tools: [
           {
             type: "function",
+            name: "searchDocs",
+            description: "Search Easy TV documents for short factual snippets (top 3).",
+            parameters: {
+              type: "object",
+              properties: {
+                query: { type: "string", description: "Short search like 'reporting details', 'onboarding steps', 'case study restaurant'." }
+              },
+              required: ["query"]
+            }
+          },
+          {
+            type: "function",
             name: "createLead",
-            description: "Save the lead (name, phone, email, notes)",
+            description: "Save the lead (name, phone, email, notes).",
             parameters: {
               type: "object",
               properties: {
@@ -108,11 +90,11 @@ KEEP IT MOVING
           {
             type: "function",
             name: "bookCall",
-            description: "Share booking link or confirm a time",
+            description: "Share booking link or confirm a time.",
             parameters: {
               type: "object",
               properties: {
-                isoDatetime:  { type: "string", description: "ISO 8601 start time (if user gave a time)" },
+                isoDatetime:  { type: "string", description: "ISO 8601 if the user gave a time" },
                 durationMins: { type: "number", default: 15 }
               }
             }
