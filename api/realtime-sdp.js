@@ -1,4 +1,4 @@
-// /api/realtime-sdp.js — proxy SDP offer to OpenAI Realtime (fixes iOS "Failed to fetch")
+// /api/realtime-sdp.js — iOS-safe SDP proxy to OpenAI Realtime
 export default async function handler(req, res) {
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -10,7 +10,6 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
   try {
-    // Expect JSON: { sdp: string, eph: string }
     let body = req.body;
     if (typeof body === "string") { try { body = JSON.parse(body); } catch {} }
     const sdp = body?.sdp;
@@ -22,9 +21,9 @@ export default async function handler(req, res) {
       headers: {
         "Authorization": `Bearer ${eph}`,
         "Content-Type": "application/sdp",
-        "OpenAI-Beta": "realtime=v1",
+        "OpenAI-Beta": "realtime=v1"
       },
-      body: sdp,
+      body: sdp
     });
 
     const text = await r.text();
