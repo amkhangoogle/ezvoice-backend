@@ -1,0 +1,73 @@
+[
+  {
+    "title": "Offer basics",
+    "section": "Pricing & Overview",
+    "text": "We place ads on living-room TV via Connected TV (e.g., YouTube on TVs). Pricing starts from 10¢ per airing; exact rates vary by market, inventory, and time of day. We never guarantee results. We propose a plan after a short discovery call."
+  },
+  {
+    "title": "Channels & coverage",
+    "section": "Inventory & Targeting",
+    "text": "Primary placements run on YouTube Connected TV (living-room screens). We support national and local coverage. Targeting and dayparts depend on available inventory for the selected geographies and time windows."
+  },
+  {
+    "title": "Creative & launch speed",
+    "section": "Production",
+    "text": "Turnkey creative workflow: offer scripting, professional voiceover, and editing. Typical launch can be ~72 hours after assets are approved. QR codes may be embedded for offers, directions, discounts, or opt-ins."
+  },
+  {
+    "title": "Reporting",
+    "section": "Measurement",
+    "text": "We provide reporting that shows when your ads ran, estimated views, dayparts/time slots, and QR-code scans. These metrics support iterative optimization of creative and placements."
+  },
+  {
+    "title": "Process summary",
+    "section": "Onboarding",
+    "text": "Greet → qualify (industry, locations, budget) → capture name + phone (email optional) → propose plan → offer a 10–30 minute discovery call. The call helps right-size markets, dayparts, and creative."
+  },
+
+  // ───────── Proof (case studies / testimonials) ─────────
+  {
+    "title": "Case study — Math learning center (Macomb, MI)",
+    "section": "Case Studies",
+    "text": "Approximately 16,435 TV airings in ~30 days; the owner reported a noticeable spike in leads. Useful for education/tutoring vertical examples; shows momentum within weeks at local-market scale."
+  },
+  {
+    "title": "Case study — Local realtor",
+    "section": "Case Studies",
+    "text": "Two campaigns (buyers & sellers) generated website opt-ins and seller leads within days. Illustrates quick lead capture in real estate when creative and dayparts match intent."
+  },
+  {
+    "title": "Case study — Insurance agency",
+    "section": "Case Studies",
+    "text": "A TV commercial with a QR code drove SMS texts and direct client inquiries. Demonstrates how QR interactivity converts living-room attention into measurable actions."
+  },
+  {
+    "title": "Case study — Restaurant",
+    "section": "Case Studies",
+    "text": "The first week produced a mix of calls, SMS, and orders. Early momentum is common when a local brand appears on living-room TV with a clear offer and QR path."
+  },
+  {
+    "title": "Testimonials (selected)",
+    "section": "Social Proof",
+    "text": "Skin by Kat (spa): ~65% clientele growth in ~30 days. Avenue Hotel (UK): hundreds of enquiries; 27 booked events worth thousands each. Gyro Boys (TX): customers came in saying ‘we saw you on TV’."
+  },
+
+  // ───────── Sales playbook ─────────
+  {
+    "title": "Sales — Objection handling",
+    "section": "Sales",
+    "text": "Price/budget: We start from 10¢ per airing and tailor markets/dayparts to your budget. Will it work?: It depends on creative and market; our case studies show momentum within days or weeks. Tried TV before: CTV gives precise, reportable signals (QR scans, time-of-day) to optimize. Not ready: Let’s book a quick discovery to outline a right-sized pilot."
+  },
+  {
+    "title": "Sales — Close pattern",
+    "section": "Sales",
+    "text": "Close with one clear question: ‘Would a quick 10-minute discovery call help tailor a plan for your market?’ If yes: ask ‘today or tomorrow?’ and propose two windows. If no: offer the booking link and a short follow-up."
+  },
+
+  // ───────── Booking ─────────
+  {
+    "title": "Discovery booking",
+    "section": "Calendar",
+    "text": "Use this link for a 10–30 minute discovery call: https://cal.com/amkhan/30min. During chat, capture name + phone; if the visitor offers a time, confirm and book."
+  }
+]
